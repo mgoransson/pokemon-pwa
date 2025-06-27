@@ -1,4 +1,4 @@
-const v = 0.02;
+const v = 0.03;
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -59,6 +59,7 @@ function spawnMapPokemon() {
   const x = Math.random() * (canvas.width - size);
   const y = Math.random() * (canvas.height - size);
 
+  // Lägg till utan att rensa listan
   mapPokemons.push({
     name,
     x,
