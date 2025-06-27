@@ -104,7 +104,7 @@ let pokemonImg = new Image();
 pokemonImg.src = getImageURL(selectedPokemon);
 
 function getImageURL(name) {
-  return `assets/images/pokemon/${name}.gif`;
+  return `assets/pokemon/${name}.gif`;
 }
 
 let mapPokemons = [];
