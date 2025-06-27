@@ -23,39 +23,10 @@ pokeballImg.src = "https://raw.githubusercontent.com/PokeAPI/sprites/master/spri
 let pokemonImg = new Image();
 pokemonImg.src = getImageURL(selectedPokemon);
 
-let mapPokemonVisible = false;
-let mapPokemon = {
-  x: 0,
-  y: 0,
-  width: 33,
-  height: 33
-};
-
-let mapPokemonTimer;
+let mapPokemons = [];
 
 function getImageURL(name) {
   return `https://img.pokemondb.net/sprites/black-white/anim/normal/${name}.gif`;
-}
-
-function spawnMapPokemon() {
-  const size = 100 / 3;
-  mapPokemon = {
-    x: Math.random() * (canvas.width - size),
-    y: Math.random() * (canvas.height - size),
-    width: size,
-    height: size
-  };
-  mapPokemonVisible = true;
-}
-
-function scheduleNextMapPokemon() {
-  clearTimeout(mapPokemonTimer);
-  mapPokemonTimer = setTimeout(() => {
-    if (mode === "map") {
-      spawnMapPokemon();
-      scheduleNextMapPokemon();
-    }
-  }, 5000);
 }
 
 function resetGame() {
@@ -80,6 +51,33 @@ function resetGame() {
   pokemonImg.src = getImageURL(selectedPokemon);
 }
 
+function spawnMapPokemon() {
+  const name = pokemonList[Math.floor(Math.random() * pokemonList.length)];
+  const img = new Image();
+  img.src = getImageURL(name);
+  const size = 100 / 3;
+  const x = Math.random() * (canvas.width - size);
+  const y = Math.random() * (canvas.height - size);
+
+  mapPokemons.push({
+    name,
+    x,
+    y,
+    width: size,
+    height: size,
+    img
+  });
+}
+
+function scheduleNextMapPokemon() {
+  setTimeout(() => {
+    if (mode === "map") {
+      spawnMapPokemon();
+      scheduleNextMapPokemon();
+    }
+  }, 5000);
+}
+
 function loadNextPokemon() {
   currentPokemonIndex = (currentPokemonIndex + 1) % pokemonList.length;
   selectedPokemon = pokemonList[currentPokemonIndex];
@@ -87,7 +85,7 @@ function loadNextPokemon() {
   resetGame();
 }
 
-let pokeball;
+let pokeball = {};
 let pokemon = { x: canvas.width / 2 - 50, y: 220, width: 100, height: 100 };
 let caughtTextTimer = 0;
 let isDragging = false;
@@ -97,8 +95,6 @@ let lastTap = 0;
 let caughtState = false;
 let caughtEffectTimer = 0;
 let caughtRotation = 0;
-
-resetGame();
 
 function getAngle(x1, y1, x2, y2) {
   return Math.atan2(y2 - y1, x2 - x1);
@@ -111,17 +107,17 @@ canvas.addEventListener("touchstart", (e) => {
   const x = touch.clientX - rect.left;
   const y = touch.clientY - rect.top;
 
-  if (mode === "map" && mapPokemonVisible) {
-    if (
-      x >= mapPokemon.x &&
-      x <= mapPokemon.x + mapPokemon.width &&
-      y >= mapPokemon.y &&
-      y <= mapPokemon.y + mapPokemon.height
-    ) {
-      mode = "catch";
-      mapPokemonVisible = false;
-      clearTimeout(mapPokemonTimer);
-      resetGame();
+  if (mode === "map") {
+    for (let i = 0; i < mapPokemons.length; i++) {
+      const p = mapPokemons[i];
+      if (x >= p.x && x <= p.x + p.width && y >= p.y && y <= p.y + p.height) {
+        selectedPokemon = p.name;
+        pokemonImg.src = getImageURL(selectedPokemon);
+        mapPokemons.splice(i, 1); // Remove clicked Pokémon
+        mode = "catch";
+        resetGame();
+        break;
+      }
     }
   } else if (mode === "catch") {
     if (now - lastTap < 300) {
@@ -234,9 +230,11 @@ function draw() {
 
   if (mode === "map") {
     ctx.drawImage(mapImg, 0, 0, canvas.width, canvas.height);
-    if (mapPokemonVisible) {
-      ctx.drawImage(pokemonImg, mapPokemon.x, mapPokemon.y, mapPokemon.width, mapPokemon.height);
-    }
+
+    mapPokemons.forEach(p => {
+      ctx.drawImage(p.img, p.x, p.y, p.width, p.height);
+    });
+
   } else if (mode === "catch") {
     ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height);
 
@@ -254,11 +252,9 @@ function draw() {
       } else {
         setTimeout(() => {
           mode = "map";
-          setTimeout(() => {
-            loadNextPokemon();
-            spawnMapPokemon();
-            scheduleNextMapPokemon();
-          }, 3000 + Math.random() * 2000);
+          const delay = 3000 + Math.random() * 2000;
+          setTimeout(spawnMapPokemon, delay);
+          scheduleNextMapPokemon();
         }, 500);
         caughtState = false;
       }
@@ -318,8 +314,9 @@ function draw() {
 }
 
 draw();
+
+// Start spawning immediately
 if (mode === "map") {
   spawnMapPokemon();
   scheduleNextMapPokemon();
 }
-
