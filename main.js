@@ -108,31 +108,28 @@ function getImageURL(name) {
 }
 
 let mapPokemons = [];
-let allowSpawning = true;
 
-function spawnMapPokemon() {
-  if (!allowSpawning || mode !== "map") return;
+function spawnPokemonToMap() {
+  if (mode !== "map") return;
+  if (mapPokemons.length >= 30) return;
 
-  const name = pokemonList[Math.floor(Math.random() * pokemonList.length)];
+  const randomIndex = Math.floor(Math.random() * pokemonList.length);
+  const name = pokemonList[randomIndex];
   const img = new Image();
   img.src = getImageURL(name);
+
   const size = 100 / 3;
   const x = Math.random() * (canvas.width - size);
   const y = Math.random() * (canvas.height - size);
 
-  mapPokemons.push({
-    name,
-    x,
-    y,
-    width: size,
-    height: size,
-    img
-  });
+  mapPokemons.push({ name, img, x, y, width: size, height: size });
 }
 
 setInterval(() => {
-  spawnMapPokemon();
-}, 5000);
+  if (mode === "map" && mapPokemons.length < 30) {
+    spawnPokemonToMap();
+  }
+}, 3000);
 
 function resetGame() {
   pokeball = {
@@ -188,22 +185,18 @@ canvas.addEventListener("touchstart", (e) => {
   if (mode === "map") {
     for (let i = 0; i < mapPokemons.length; i++) {
       const p = mapPokemons[i];
-      if (
-        x >= p.x &&
-        x <= p.x + p.width &&
-        y >= p.y &&
-        y <= p.y + p.height
-      ) {
+      if (x >= p.x && x <= p.x + p.width && y >= p.y && y <= p.y + p.height) {
         selectedPokemon = p.name;
         pokemonImg.src = getImageURL(selectedPokemon);
         mode = "catch";
-        allowSpawning = false;
-        mapPokemons.splice(i, 1); // Ta bort den valda från kartan
+        mapPokemons.splice(i, 1);
         resetGame();
         return;
       }
     }
-  } else if (mode === "catch") {
+  }
+
+  if (mode === "catch") {
     if (now - lastTap < 300) {
       resetGame();
       return;
@@ -314,11 +307,9 @@ function draw() {
 
   if (mode === "map") {
     ctx.drawImage(mapImg, 0, 0, canvas.width, canvas.height);
-
-    for (const p of mapPokemons) {
+    mapPokemons.forEach(p => {
       ctx.drawImage(p.img, p.x, p.y, p.width, p.height);
-    }
-
+    });
   } else if (mode === "catch") {
     ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height);
 
@@ -337,7 +328,6 @@ function draw() {
         setTimeout(() => {
           mode = "map";
           loadNextPokemon();
-          allowSpawning = true;
         }, 500);
         caughtState = false;
       }
