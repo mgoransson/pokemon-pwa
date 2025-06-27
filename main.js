@@ -1,4 +1,4 @@
-const v = 0.06;
+const v = 0.07;
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -7,7 +7,6 @@ canvas.height = window.innerHeight;
 
 let mode = "map"; // 'map' or 'catch'
 
-/*
 let pokemonList = [
   "bulbasaur","ivysaur","venusaur",
   "charmander","charmeleon","charizard",
@@ -84,9 +83,8 @@ let pokemonList = [
   "dratini","dragonair","dragonite",
   "mewtwo","mew"
 ];
-*/
 
-let pokemonList = ["pikachu", "bulbasaur", "charmander"];
+//let pokemonList = ["pikachu", "bulbasaur", "charmander"];
 
 let currentPokemonIndex = 0;
 let selectedPokemon = pokemonList[currentPokemonIndex];
