@@ -7,6 +7,7 @@ canvas.height = window.innerHeight;
 
 let mode = "map"; // 'map' or 'catch'
 
+/*
 let pokemonList = [
   "bulbasaur","ivysaur","venusaur",
   "charmander","charmeleon","charizard",
@@ -83,8 +84,9 @@ let pokemonList = [
   "dratini","dragonair","dragonite",
   "mewtwo","mew"
 ];
+*/
 
-//let pokemonList = ["pikachu", "bulbasaur", "charmander"];
+let pokemonList = ["pikachu", "bulbasaur", "charmander", "squirtle"];
 
 let currentPokemonIndex = 0;
 let selectedPokemon = pokemonList[currentPokemonIndex];
