@@ -1,4 +1,4 @@
-const v = 0.08;
+const v = 0.09;
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -395,7 +395,7 @@ if ('serviceWorker' in navigator) {
 
       navigator.serviceWorker.ready.then(() => {
         if (!localStorage.getItem('offlineAlertShown')) {
-          alert('Appen är nu redo att användas offline!\nTips: Lägg till den på hemskärmen för bästa upplevelse.');
+          alert(`Appen är nu redo att användas offline! Version: ${v}\nTips: Lägg till den på hemskärmen för bästa upplevelse.`);
           localStorage.setItem('offlineAlertShown', 'true');
         }
       });
