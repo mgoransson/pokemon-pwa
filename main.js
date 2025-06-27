@@ -1,6 +1,13 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+
 let pokemonList = ["pikachu", "bulbasaur", "charmander"];
 let currentPokemonIndex = 0;
 let selectedPokemon = pokemonList[currentPokemonIndex];
@@ -28,20 +35,23 @@ let pokeball = {
 
 let pokemon = { x: 150, y: 190, width: 100, height: 100 };
 
-let caughtState = false;
-let caughtEffectTimer = 0;
-let caughtRotation = 0;
+let caughtTextTimer = 0;
 let isDragging = false;
 let lastTouchAngle = null;
 let lastTouchTime = null;
+let lastTap = 0;
+
+let caughtState = false;
+let caughtEffectTimer = 0;
+let caughtRotation = 0;
 
 function getImageURL(name) {
   return `https://img.pokemondb.net/sprites/black-white/anim/normal/${name}.gif`;
 }
 
 function resetGame() {
-  pokeball.x = 200;
-  pokeball.y = 550;
+  pokeball.x = canvas.width / 2;
+  pokeball.y = canvas.height - 100;
   pokeball.scale = 5;
   pokeball.isMoving = false;
   pokeball.vx = 0;
@@ -49,6 +59,9 @@ function resetGame() {
   pokeball.rotation = 0;
   pokeball.rotationSpeed = 0;
   isDragging = false;
+  caughtTextTimer = 0;
+  lastTouchAngle = null;
+  lastTouchTime = null;
   caughtState = false;
   caughtEffectTimer = 0;
   caughtRotation = 0;
@@ -58,6 +71,7 @@ function resetGame() {
 function loadNextPokemon() {
   currentPokemonIndex = (currentPokemonIndex + 1) % pokemonList.length;
   selectedPokemon = pokemonList[currentPokemonIndex];
+  pokemonImg.src = getImageURL(selectedPokemon);
   resetGame();
 }
 
@@ -66,17 +80,25 @@ function getAngle(x1, y1, x2, y2) {
 }
 
 canvas.addEventListener("touchstart", (e) => {
+  const now = new Date().getTime();
+  if (now - lastTap < 300) {
+    resetGame();
+    return;
+  }
+  lastTap = now;
+
   const touch = e.touches[0];
   const rect = canvas.getBoundingClientRect();
   const x = touch.clientX - rect.left;
   const y = touch.clientY - rect.top;
+
   const dx = x - pokeball.x;
   const dy = y - pokeball.y;
 
   if (Math.sqrt(dx * dx + dy * dy) < pokeball.baseSize * pokeball.scale) {
     isDragging = true;
     lastTouchAngle = getAngle(pokeball.x, pokeball.y, x, y);
-    lastTouchTime = new Date().getTime();
+    lastTouchTime = now;
   }
 });
 
@@ -139,7 +161,7 @@ canvas.addEventListener("touchend", () => {
 });
 
 function updateBallScale() {
-  const startY = 550;
+  const startY = canvas.height - 100;
   const endY = pokemon.y + pokemon.height / 2;
   const totalDistance = startY - endY;
   const currentDistance = pokeball.y - endY;
@@ -155,6 +177,7 @@ function updateBallScale() {
 function drawCaughtEffect() {
   const maxRadius = 70;
   const progress = caughtEffectTimer / 60;
+
   const radius = maxRadius * (1 - progress);
   const alpha = 1 - progress;
 
@@ -192,6 +215,7 @@ function draw() {
     }
   } else {
     ctx.drawImage(pokemonImg, pokemon.x, pokemon.y, pokemon.width, pokemon.height);
+
     const size = pokeball.baseSize * pokeball.scale;
     ctx.save();
     ctx.translate(pokeball.x, pokeball.y);
@@ -204,6 +228,7 @@ function draw() {
     pokeball.x += pokeball.vx;
     pokeball.y += pokeball.vy;
     updateBallScale();
+
     pokeball.rotation += pokeball.rotationSpeed;
     pokeball.rotationSpeed *= 0.95;
 
@@ -242,4 +267,5 @@ function draw() {
   requestAnimationFrame(draw);
 }
 
+resetGame();
 draw();
