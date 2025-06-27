@@ -1,3 +1,4 @@
+const v = 0.01;
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -317,3 +318,8 @@ function draw() {
 }
 
 draw();
+if (mode === "map") {
+  spawnMapPokemon();
+  scheduleNextMapPokemon();
+}
+
