@@ -1,5 +1,3 @@
-// script.js
-
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -26,18 +24,37 @@ pokemonImg.src = getImageURL(selectedPokemon);
 
 let mapPokemonVisible = false;
 let mapPokemon = {
-  x: canvas.width / 2 - 50,
-  y: canvas.height / 2 - 50,
-  width: 100,
-  height: 100
+  x: 0,
+  y: 0,
+  width: 33,
+  height: 33
 };
 
-setTimeout(() => {
-  mapPokemonVisible = true;
-}, 5000);
+let mapPokemonTimer;
 
 function getImageURL(name) {
   return `https://img.pokemondb.net/sprites/black-white/anim/normal/${name}.gif`;
+}
+
+function spawnMapPokemon() {
+  const size = 100 / 3;
+  mapPokemon = {
+    x: Math.random() * (canvas.width - size),
+    y: Math.random() * (canvas.height - size),
+    width: size,
+    height: size
+  };
+  mapPokemonVisible = true;
+}
+
+function scheduleNextMapPokemon() {
+  clearTimeout(mapPokemonTimer);
+  mapPokemonTimer = setTimeout(() => {
+    if (mode === "map") {
+      spawnMapPokemon();
+      scheduleNextMapPokemon();
+    }
+  }, 5000);
 }
 
 function resetGame() {
@@ -69,7 +86,7 @@ function loadNextPokemon() {
   resetGame();
 }
 
-let pokeball = {};
+let pokeball;
 let pokemon = { x: canvas.width / 2 - 50, y: 220, width: 100, height: 100 };
 let caughtTextTimer = 0;
 let isDragging = false;
@@ -79,6 +96,8 @@ let lastTap = 0;
 let caughtState = false;
 let caughtEffectTimer = 0;
 let caughtRotation = 0;
+
+resetGame();
 
 function getAngle(x1, y1, x2, y2) {
   return Math.atan2(y2 - y1, x2 - x1);
@@ -99,6 +118,8 @@ canvas.addEventListener("touchstart", (e) => {
       y <= mapPokemon.y + mapPokemon.height
     ) {
       mode = "catch";
+      mapPokemonVisible = false;
+      clearTimeout(mapPokemonTimer);
       resetGame();
     }
   } else if (mode === "catch") {
@@ -232,7 +253,11 @@ function draw() {
       } else {
         setTimeout(() => {
           mode = "map";
-          loadNextPokemon();
+          setTimeout(() => {
+            loadNextPokemon();
+            spawnMapPokemon();
+            scheduleNextMapPokemon();
+          }, 3000 + Math.random() * 2000);
         }, 500);
         caughtState = false;
       }
