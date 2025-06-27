@@ -1,5 +1,5 @@
 {
-  "name": "Min PWA",
+  "name": "Pokémon Catch Game",
   "short_name": "PWA",
   "start_url": ".",
   "display": "standalone",
