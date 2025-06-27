@@ -1,4 +1,5 @@
-const v = 0.09;
+const v = 0.10;
+let showVersionTimer = 300; // 60 FPS * 5 sekunder
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -383,6 +384,16 @@ function draw() {
     }
   }
 
+  if (showVersionTimer > 0) {
+    ctx.save();
+    ctx.font = "bold 20px sans-serif";
+    ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+    ctx.fillRect(10, 10, ctx.measureText("v" + v).width + 20, 30);
+    ctx.fillStyle = "white";
+    ctx.fillText("v" + v, 20, 30);
+    ctx.restore();
+    showVersionTimer--;
+  }
   requestAnimationFrame(draw);
 }
 
@@ -395,7 +406,7 @@ if ('serviceWorker' in navigator) {
 
       navigator.serviceWorker.ready.then(() => {
         if (!localStorage.getItem('offlineAlertShown')) {
-          alert(`Appen är nu redo att användas offline! Version: ${v}\nTips: Lägg till den på hemskärmen för bästa upplevelse.`);
+          showVersionTimer = 300; // Visa i 5 sekunder
           localStorage.setItem('offlineAlertShown', 'true');
         }
       });
