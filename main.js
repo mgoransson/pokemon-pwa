@@ -1,4 +1,4 @@
-const v = 0.04;
+const v = 0.05;
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -7,6 +7,7 @@ canvas.height = window.innerHeight;
 
 let mode = "map"; // 'map' or 'catch'
 
+/*
 let pokemonList = [
   "bulbasaur","ivysaur","venusaur",
   "charmander","charmeleon","charizard",
@@ -83,24 +84,27 @@ let pokemonList = [
   "dratini","dragonair","dragonite",
   "mewtwo","mew"
 ];
+*/
+
+let pokemonList = ["pikachu", "bulbasaur", "charmander"];
 
 let currentPokemonIndex = 0;
 let selectedPokemon = pokemonList[currentPokemonIndex];
 
 let mapImg = new Image();
-mapImg.src = "https://miro.medium.com/v2/resize:fit:1400/format:webp/0*jc9FPbRF6vg26qGO.jpg";
+mapImg.src = "assets/images/map.jpg";
 
 let backgroundImg = new Image();
-backgroundImg.src = "https://preview.redd.it/2-days-in-a-row-v0-jg8blkd3cse91.jpg?width=640&crop=smart&auto=webp&s=6b3cded6b28dc6422ab4b451c6904f3ccdfeceee";
+backgroundImg.src = "assets/images/background.jpg";
 
 let pokeballImg = new Image();
-pokeballImg.src = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png";
+pokeballImg.src = "assets/images/pokeball.png";
 
 let pokemonImg = new Image();
 pokemonImg.src = getImageURL(selectedPokemon);
 
 function getImageURL(name) {
-  return `https://img.pokemondb.net/sprites/black-white/anim/normal/${name}.gif`;
+  return `assets/images/pokemon/${name}.gif`;
 }
 
 let mapPokemons = [];
