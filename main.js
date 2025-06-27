@@ -1,4 +1,4 @@
-const v = 0.05;
+const v = 0.06;
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
