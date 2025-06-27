@@ -387,3 +387,20 @@ function draw() {
 }
 
 draw();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js')
+    .then(() => {
+      console.log('✅ ServiceWorker registrerad');
+
+      navigator.serviceWorker.ready.then(() => {
+        if (!localStorage.getItem('offlineAlertShown')) {
+          alert('Appen är nu redo att användas offline!\nTips: Lägg till den på hemskärmen för bästa upplevelse.');
+          localStorage.setItem('offlineAlertShown', 'true');
+        }
+      });
+    })
+    .catch(err => {
+      console.error('❌ Kunde inte registrera ServiceWorker:', err);
+    });
+}
