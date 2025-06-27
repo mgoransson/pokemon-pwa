@@ -1,4 +1,4 @@
-const v = 0.03;
+const v = 0.04;
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -23,11 +23,36 @@ pokeballImg.src = "https://raw.githubusercontent.com/PokeAPI/sprites/master/spri
 let pokemonImg = new Image();
 pokemonImg.src = getImageURL(selectedPokemon);
 
-let mapPokemons = [];
-
 function getImageURL(name) {
   return `https://img.pokemondb.net/sprites/black-white/anim/normal/${name}.gif`;
 }
+
+let mapPokemons = [];
+let allowSpawning = true;
+
+function spawnMapPokemon() {
+  if (!allowSpawning || mode !== "map") return;
+
+  const name = pokemonList[Math.floor(Math.random() * pokemonList.length)];
+  const img = new Image();
+  img.src = getImageURL(name);
+  const size = 100 / 3;
+  const x = Math.random() * (canvas.width - size);
+  const y = Math.random() * (canvas.height - size);
+
+  mapPokemons.push({
+    name,
+    x,
+    y,
+    width: size,
+    height: size,
+    img
+  });
+}
+
+setInterval(() => {
+  spawnMapPokemon();
+}, 5000);
 
 function resetGame() {
   pokeball = {
@@ -49,34 +74,6 @@ function resetGame() {
   caughtEffectTimer = 0;
   caughtRotation = 0;
   pokemonImg.src = getImageURL(selectedPokemon);
-}
-
-function spawnMapPokemon() {
-  const name = pokemonList[Math.floor(Math.random() * pokemonList.length)];
-  const img = new Image();
-  img.src = getImageURL(name);
-  const size = 100 / 3;
-  const x = Math.random() * (canvas.width - size);
-  const y = Math.random() * (canvas.height - size);
-
-  // Lägg till utan att rensa listan
-  mapPokemons.push({
-    name,
-    x,
-    y,
-    width: size,
-    height: size,
-    img
-  });
-}
-
-function scheduleNextMapPokemon() {
-  setTimeout(() => {
-    if (mode === "map") {
-      spawnMapPokemon();
-      scheduleNextMapPokemon();
-    }
-  }, 5000);
 }
 
 function loadNextPokemon() {
@@ -111,13 +108,19 @@ canvas.addEventListener("touchstart", (e) => {
   if (mode === "map") {
     for (let i = 0; i < mapPokemons.length; i++) {
       const p = mapPokemons[i];
-      if (x >= p.x && x <= p.x + p.width && y >= p.y && y <= p.y + p.height) {
+      if (
+        x >= p.x &&
+        x <= p.x + p.width &&
+        y >= p.y &&
+        y <= p.y + p.height
+      ) {
         selectedPokemon = p.name;
         pokemonImg.src = getImageURL(selectedPokemon);
-        mapPokemons.splice(i, 1); // Remove clicked Pokémon
         mode = "catch";
+        allowSpawning = false;
+        mapPokemons.splice(i, 1); // Ta bort den valda från kartan
         resetGame();
-        break;
+        return;
       }
     }
   } else if (mode === "catch") {
@@ -232,9 +235,9 @@ function draw() {
   if (mode === "map") {
     ctx.drawImage(mapImg, 0, 0, canvas.width, canvas.height);
 
-    mapPokemons.forEach(p => {
+    for (const p of mapPokemons) {
       ctx.drawImage(p.img, p.x, p.y, p.width, p.height);
-    });
+    }
 
   } else if (mode === "catch") {
     ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height);
@@ -253,9 +256,8 @@ function draw() {
       } else {
         setTimeout(() => {
           mode = "map";
-          const delay = 3000 + Math.random() * 2000;
-          setTimeout(spawnMapPokemon, delay);
-          scheduleNextMapPokemon();
+          loadNextPokemon();
+          allowSpawning = true;
         }, 500);
         caughtState = false;
       }
@@ -315,9 +317,3 @@ function draw() {
 }
 
 draw();
-
-// Start spawning immediately
-if (mode === "map") {
-  spawnMapPokemon();
-  scheduleNextMapPokemon();
-}
